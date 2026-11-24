@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="cola_tablet_side_panel_min">320dp</dimen>
+    <dimen name="cola_toolbar_button_width">48dp</dimen>
+    <dimen name="cola_toolbar_button_height">44dp</dimen>
+    <dimen name="cola_tablet_status_text">14sp</dimen>
+    <dimen name="cola_drawer_width">320dp</dimen>
+</resources>

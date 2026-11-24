@@ -70,16 +70,34 @@ public class ChessBoardPlay extends ChessBoard {
     @Override
     protected int getSqSizeH(int height) { return (height) / 8; }
     @Override
-    protected int getMaxHeightPercentage() { return 75; }
+    protected int getMaxHeightPercentage() {
+        if (ColaUi.isTablet(getContext()))
+            return 98;
+        Configuration config = getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            return 98;
+        return 75;
+    }
+
     @Override
-    protected int getMaxWidthPercentage() { return 65; }
+    protected int getMaxWidthPercentage() {
+        if (ColaUi.isTablet(getContext()))
+            return 98;
+        Configuration config = getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            return 95;
+        return 65;
+    }
 
     @Override
     protected void computeOrigin(int width, int height) {
         x0 = (width - sqSize * 8) / 2;
         Configuration config = getResources().getConfiguration();
-        boolean landScape = (config.orientation == Configuration.ORIENTATION_LANDSCAPE);
-        y0 = landScape ? 0 : (height - sqSize * 8) / 2;
+        boolean sideBySide = ColaUi.useSideBySideMainLayout(getContext());
+        if (sideBySide)
+            y0 = Math.max(0, (height - sqSize * 8) / 2);
+        else
+            y0 = (height - sqSize * 8) / 2;
     }
     @Override
     protected int getXFromSq(int sq) { return Position.getX(sq); }

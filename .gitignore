@@ -14,3 +14,7 @@
 .externalNativeBuild
 /release
 *~
+.vscode/
+ColaChess-debug.apk
+ColaChess-release-unsigned.apk
+build/cola-emulator-*.log

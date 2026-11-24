@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DroidFish</string>
+    <string name="app_name">可乐国际象棋</string>
     <string name="engine_hash_default">64</string>
     <string name="moves_per_session_default">60</string>
     <string name="time_control_default">120000</string>
     <string name="time_increment_default">0</string>
     <string name="squareSelectType_default">1</string>
-    <string name="language_default">default</string>
+    <string name="language_default">zh_CN</string>
+    <string name="cola_skill_mode_default">beginner</string>
+    <string name="cola_skill_mode_menu_beginner">棋力：入门（点按→大师）</string>
+    <string name="cola_skill_mode_menu_master">棋力：大师（点按→入门）</string>
+    <string name="cola_skill_toast_beginner">已切换到入门模式（弱引擎 CuckooChess）</string>
+    <string name="cola_skill_toast_master">已切换到大师模式（Stockfish 满强度）</string>
     <string name="font_size_default">12</string>
     <string name="thinking_arrows_default">4</string>
     <string name="scroll_sensitivity_default">2</string>
@@ -18,9 +23,9 @@
     <string name="cpu_warning">\
 <b>CPU 使用率</b>\
 \
-保持 DroidFish 在后台运行和<i>对局模式</i>设置为<i>分析</i>或 <i>电脑对电脑</i>，或者<i>分析时间</i>设置为较大的值，或者<i>思考</i>已启用， DroidFish 将会使用大量的 CPU 功耗。\
+保持 ColaChess 在后台运行和<i>对局模式</i>设置为<i>分析</i>或 <i>电脑对电脑</i>，或者<i>分析时间</i>设置为较大的值，或者<i>思考</i>已启用， ColaChess 将会使用大量的 CPU 功耗。\
 \
-使用电池运行时，建议更改设置以节省电池电量，或者在不使用该程序时，使用返回按钮退出<i>DroidFish</i>。
+使用电池运行时，建议更改设置以节省电池电量，或者在不使用该程序时，使用返回按钮退出<i>ColaChess</i>。
     </string>
     <string name="offer_draw">提议和棋</string>
     <string name="queen">后</string>
@@ -50,9 +55,9 @@
     <string name="tools_menu">工具</string>
     <string name="load_save_menu">加载/保存对局</string>
     <string name="goto_move">转到着法</string>
-    <string name="limit_strength">Limit Strength</string>
-    <string name="set_engine_strength">Set Engine Strength</string>
-    <string name="engine_cannot_reduce_strength">Engine cannot reduce playing strength</string>
+    <string name="limit_strength">限制棋力</string>
+    <string name="set_engine_strength">设置引擎棋力</string>
+    <string name="engine_cannot_reduce_strength">当前引擎无法降低棋力</string>
     <string name="edit_randomization">编辑随机性</string>
     <string name="invalid_number_format">编号格式无效</string>
     <string name="side_to_move">轮走棋方</string>
@@ -196,7 +201,7 @@
     <string name="truncate_variations">截断变例</string>
     <string name="heavy_cpu_usage">高 CPU 使用率</string>
     <string name="background_processing">后台处理</string>
-    <string name="lot_cpu_power">DroidFish 使用大量的 CPU 功耗</string>
+    <string name="lot_cpu_power">ColaChess 使用大量的 CPU 功耗</string>
     <string name="delete">删除</string>
     <string name="delete_game">删除对局?</string>
     <string name="delete_file">删除文件</string>

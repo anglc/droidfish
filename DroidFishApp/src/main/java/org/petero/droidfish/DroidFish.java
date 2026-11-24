@@ -633,7 +633,7 @@ public class DroidFish extends Activity
         guides.add(tg);
 
         tg = TourGuide.init(this);
-        int gravity = !landScapeView() ? Gravity.BOTTOM : leftHandedView() ? Gravity.LEFT : Gravity.RIGHT;
+        int gravity = !wideMainLayout() ? Gravity.BOTTOM : leftHandedView() ? Gravity.LEFT : Gravity.RIGHT;
         tg.setToolTip(new ToolTip()
                       .setTitle(getString(R.string.tour_chessBoard_title))
                       .setDescription(getString(R.string.tour_chessBoard_desc))
@@ -642,7 +642,7 @@ public class DroidFish extends Activity
         guides.add(tg);
 
         tg = TourGuide.init(this);
-        gravity = !landScapeView() ? Gravity.TOP : Gravity.BOTTOM;
+        gravity = !wideMainLayout() ? Gravity.TOP : Gravity.BOTTOM;
         tg.setToolTip(new ToolTip()
                       .setTitle(getString(R.string.tour_buttons_title))
                       .setDescription(getString(R.string.tour_buttons_desc))
@@ -651,7 +651,7 @@ public class DroidFish extends Activity
         guides.add(tg);
 
         tg = TourGuide.init(this);
-        gravity = !landScapeView() ? Gravity.TOP : leftHandedView() ? Gravity.RIGHT : Gravity.LEFT;
+        gravity = !wideMainLayout() ? Gravity.TOP : leftHandedView() ? Gravity.RIGHT : Gravity.LEFT;
         tg.setToolTip(new ToolTip()
                       .setTitle(getString(R.string.tour_moveList_title))
                       .setDescription(getString(R.string.tour_moveList_desc))
@@ -888,10 +888,23 @@ public class DroidFish extends Activity
     private boolean landScapeView() {
         return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
-    
+
+    /** Board beside move list (landscape or tablet). */
+    private boolean wideMainLayout() {
+        return ColaUi.useSideBySideMainLayout(this);
+    }
+
+    private int getMainLayoutRes() {
+        if (leftHandedView())
+            return R.layout.main_left_handed;
+        if (wideMainLayout())
+            return R.layout.main_tablet;
+        return R.layout.main;
+    }
+
     /** Return true if left-handed layout should be used. */
     private boolean leftHandedView() {
-        return settings.getBoolean("leftHanded", false) && landScapeView();
+        return settings.getBoolean("leftHanded", false) && wideMainLayout();
     }
 
     /** Re-read preferences settings. */
@@ -906,7 +919,7 @@ public class DroidFish extends Activity
 
     private void initUI() {
         leftHanded = leftHandedView();
-        setContentView(leftHanded ? R.layout.main_left_handed : R.layout.main);
+        setContentView(getMainLayoutRes());
         overrideViewAttribs();
 
         // title lines need to be regenerated every time due to layout changes (rotations)
@@ -1097,8 +1110,8 @@ public class DroidFish extends Activity
         mShowBookHints = settings.getBoolean("bookHints", false);
         mEcoHints = getIntSetting("ecoHints", ECO_HINTS_AUTO);
 
-        String engine = settings.getString("engine", "stockfish");
-        setEngine(engine);
+        applyColaSkillMode(settings.getString("colaSkillMode",
+                getString(R.string.cola_skill_mode_default)), false);
 
         mPonderMode = settings.getBoolean("ponderMode", false);
         if (!mPonderMode)
@@ -1249,14 +1262,14 @@ public class DroidFish extends Activity
     private void updateButtons() {
         boolean largeButtons = settings.getBoolean("largeButtons", false);
         Resources r = getResources();
-        int bWidth  = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36, r.getDisplayMetrics()));
-        int bHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, r.getDisplayMetrics()));
+        int bWidth  = r.getDimensionPixelSize(R.dimen.cola_toolbar_button_width);
+        int bHeight = r.getDimensionPixelSize(R.dimen.cola_toolbar_button_height);
         if (largeButtons) {
             if (custom1ButtonActions.isEnabled() &&
                 custom2ButtonActions.isEnabled() &&
                 custom3ButtonActions.isEnabled()) {
                 Configuration config = getResources().getConfiguration();
-                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (wideMainLayout()) {
                     bWidth  = bWidth  * 6 / 5;
                     bHeight = bHeight * 6 / 5;
                 } else {
@@ -1319,6 +1332,73 @@ public class DroidFish extends Activity
         ctrl.setEngine(engine);
         setEngineTitle(engine, ctrl.eloData().getEloToUse());
     }
+
+  private static final String COLA_SKILL_MODE_KEY = "colaSkillMode";
+  private static final String COLA_SKILL_BEGINNER = "beginner";
+  private static final String COLA_SKILL_MASTER   = "master";
+
+  private boolean isColaBeginnerMode() {
+    return COLA_SKILL_BEGINNER.equals(
+        settings.getString(COLA_SKILL_MODE_KEY, getString(R.string.cola_skill_mode_default)));
+  }
+
+  /** Apply beginner (CuckooChess, min Elo) or master (Stockfish, full strength) preset. */
+  private void applyColaSkillMode(String mode, boolean showToast) {
+    boolean beginner = COLA_SKILL_BEGINNER.equals(mode);
+    String engine = beginner ? "cuckoochess" : "stockfish";
+    Editor ed = settings.edit();
+    ed.putString(COLA_SKILL_MODE_KEY, mode);
+    ed.putString("engine", engine);
+    ed.apply();
+    setEngineOptions(false);
+    setEngine(engine);
+    if (beginner) {
+      EloData elo = ctrl.eloData();
+      int weak = elo.canChangeStrength() ? elo.minElo : -625;
+      ctrl.setStrength(true, weak);
+    } else {
+      ctrl.setStrength(false, 0);
+    }
+    if (showToast) {
+      DroidFishApp.toast(beginner ? R.string.cola_skill_toast_beginner
+                                  : R.string.cola_skill_toast_master,
+                         Toast.LENGTH_SHORT);
+    }
+    refreshLeftDrawerItems();
+  }
+
+  private DrawerItem[] leftItems;
+  private final ArrayList<DrawerItem> leftDrawerList = new ArrayList<>();
+  private ArrayAdapter<DrawerItem> leftDrawerAdapter;
+
+  private DrawerItem buildSkillModeDrawerItem() {
+    int label = isColaBeginnerMode() ? R.string.cola_skill_mode_menu_beginner
+                                     : R.string.cola_skill_mode_menu_master;
+    return new DrawerItem(DrawerItemId.SKILL_MODE_TOGGLE, label);
+  }
+
+  private DrawerItem[] buildLeftDrawerItems() {
+    return new DrawerItem[] {
+        new DrawerItem(DrawerItemId.NEW_GAME, R.string.option_new_game),
+        buildSkillModeDrawerItem(),
+        new DrawerItem(DrawerItemId.SET_STRENGTH, R.string.set_engine_strength),
+        new DrawerItem(DrawerItemId.EDIT_BOARD, R.string.option_edit_board),
+        new DrawerItem(DrawerItemId.FILE_MENU, R.string.option_file),
+        new DrawerItem(DrawerItemId.SELECT_BOOK, R.string.option_select_book),
+        new DrawerItem(DrawerItemId.MANAGE_ENGINES, R.string.option_manage_engines),
+        new DrawerItem(DrawerItemId.SET_COLOR_THEME, R.string.option_color_theme),
+        new DrawerItem(DrawerItemId.SETTINGS, R.string.option_settings),
+        new DrawerItem(DrawerItemId.ABOUT, R.string.option_about),
+    };
+  }
+
+  private void refreshLeftDrawerItems() {
+    if (leftDrawerList == null || leftDrawerAdapter == null)
+      return;
+    leftDrawerList.clear();
+    Collections.addAll(leftDrawerList, buildLeftDrawerItems());
+    leftDrawerAdapter.notifyDataSetChanged();
+  }
 
     private void setEngineTitle(String engine, int elo) {
         String eName = "";
@@ -1451,6 +1531,7 @@ public class DroidFish extends Activity
 
     private enum DrawerItemId {
         NEW_GAME,
+        SKILL_MODE_TOGGLE,
         SET_STRENGTH,
         EDIT_BOARD,
         SETTINGS,
@@ -1470,23 +1551,17 @@ public class DroidFish extends Activity
         leftDrawer = findViewById(R.id.left_drawer);
         rightDrawer = findViewById(R.id.right_drawer);
 
-        final DrawerItem[] leftItems = new DrawerItem[] {
-            new DrawerItem(DrawerItemId.NEW_GAME, R.string.option_new_game),
-            new DrawerItem(DrawerItemId.SET_STRENGTH, R.string.set_engine_strength),
-            new DrawerItem(DrawerItemId.EDIT_BOARD, R.string.option_edit_board),
-            new DrawerItem(DrawerItemId.FILE_MENU, R.string.option_file),
-            new DrawerItem(DrawerItemId.SELECT_BOOK, R.string.option_select_book),
-            new DrawerItem(DrawerItemId.MANAGE_ENGINES, R.string.option_manage_engines),
-            new DrawerItem(DrawerItemId.SET_COLOR_THEME, R.string.option_color_theme),
-            new DrawerItem(DrawerItemId.SETTINGS, R.string.option_settings),
-            new DrawerItem(DrawerItemId.ABOUT, R.string.option_about),
-        };
-        leftDrawer.setAdapter(new ArrayAdapter<>(this,
-                                                 R.layout.drawer_list_item,
-                                                 leftItems));
+        leftItems = buildLeftDrawerItems();
+        leftDrawerList.clear();
+        Collections.addAll(leftDrawerList, leftItems);
+        leftDrawerAdapter = new ArrayAdapter<>(this,
+                                               R.layout.drawer_list_item,
+                                               leftDrawerList);
+        leftDrawer.setAdapter(leftDrawerAdapter);
         leftDrawer.setOnItemClickListener((parent, view, position, id) -> {
-            DrawerItem di = leftItems[position];
-            handleDrawerSelection(di.id);
+            DrawerItem di = leftDrawerAdapter.getItem(position);
+            if (di != null)
+                handleDrawerSelection(di.id);
         });
 
         final DrawerItem[] rightItems = new DrawerItem[] {
@@ -1521,6 +1596,9 @@ public class DroidFish extends Activity
         switch (id) {
         case NEW_GAME:
             showDialog(NEW_GAME_DIALOG);
+            break;
+        case SKILL_MODE_TOGGLE:
+            applyColaSkillMode(isColaBeginnerMode() ? COLA_SKILL_MASTER : COLA_SKILL_BEGINNER, true);
             break;
         case SET_STRENGTH:
             reShowDialog(SET_STRENGTH_DIALOG);

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ColaChess 平板+电视模拟器
+Comment=启动 ColaChess_Tablet 与 ColaChess_TV（需在已登录桌面双击）
+Exec=/bin/bash /home/zts014/Desktop/cola-emulator-zts014-桌面启动.sh
+Path=/home/zts014
+Icon=utilities-terminal
+Terminal=true
+StartupNotify=false
+Categories=Development;

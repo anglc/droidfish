@@ -12,11 +12,12 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_marginRight="2dp"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:layout_height="fill_parent"
-            android:paddingRight="1dp">
+            android:layout_marginEnd="2dp"
+            android:layout_weight="0.85"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:minWidth="@dimen/cola_tablet_side_panel_min"
+            android:paddingEnd="1dp">
 
             <include
                 android:layout_width="fill_parent"
@@ -119,9 +120,9 @@
         <view
             class="org.petero.droidfish.ChessBoardPlay"
             android:id="@+id/chessboard"
-            android:layout_weight="0"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
+            android:layout_weight="1.15"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <include layout="@layout/left_drawer" />

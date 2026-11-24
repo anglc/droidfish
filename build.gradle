@@ -23,3 +23,18 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+/** 编译并在三台 API 34 AVD 上冒烟测试（见 scripts/cola-avd-pipeline.sh） */
+task colaAvdSmokeTest {
+    dependsOn ':DroidFishApp:assembleDebug'
+    doLast {
+        def env = System.getenv()
+        def javaHome = env.get('JAVA_HOME') ?: '/usr/lib/jvm/java-17-openjdk-amd64'
+        exec {
+            environment 'JAVA_HOME', javaHome
+            environment 'COLA_BUILD', '1'
+            workingDir rootProject.projectDir
+            commandLine 'bash', new File(rootProject.projectDir, 'scripts/cola-avd-pipeline.sh')
+        }
+    }
+}
